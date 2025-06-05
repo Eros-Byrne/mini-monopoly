@@ -1,10 +1,4 @@
-# Assessment Starter
-
-To use this project, you need to fork it in Gitlab.
-
-Then, remove the fork relationship using Settings/Advanced.
-
-Then, clone the project to your local environment.
+# Starter
 
 When you load the project into IntelliJ, make sure that you select the ```build.gradle``` file and then import as a project.
 
