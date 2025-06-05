@@ -13,9 +13,6 @@ IntelliJ may well ask you to select a Java SDK. Pick a OpenJDK 17 SDK.
 For running in CMD make sure to switch to UTF-8 encoding to display characters like dashes and pound signs etc do this by typing
 chcp 65001.
 
-
-## On NSA Laptops or Cloud Desktop
-
 The Java SDK package is already installed. It has set the ```CLASSPATH``` environment variable and this interferes with the Gradle build.
 
 I have provided two scripts that will unset the ```CLASSPATH``` environment variable.
