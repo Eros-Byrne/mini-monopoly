@@ -1,0 +1,149 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'checkstyle'
+    id 'idea'
+    id 'application'
+    id 'info.solidsoft.pitest' version '1.15.0'
+    id 'com.gradleup.shadow' version '8.3.6'
+
+}
+
+apply plugin: 'info.solidsoft.pitest.aggregator' // to 'pitestReportAggregate' appear
+
+group 'com.nsa.cm6123-6623'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 17
+targetCompatibility = 17
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+
+
+dependencies {
+
+
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.24.3'
+    implementation 'org.apache.logging.log4j:log4j-core:2.24.3'
+    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.24.3'
+
+
+    testImplementation(platform('org.junit:junit-bom:5.11.4'))
+    testImplementation('org.junit.jupiter:junit-jupiter:5.11.4')
+    testImplementation('org.mockito:mockito-core:5.15.2')
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.4")
+
+}
+
+//test configuration
+test{
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+//application configuration
+
+run{
+    standardInput = System.in
+}
+
+jar {
+    manifest {
+        attributes ('Main-Class': 'com.cm6123.monopoly.app.Application',
+        'Multi-Release':'true')
+
+    }
+    from sourceSets.main.allSource
+
+}
+
+
+
+application {
+    mainClassName = 'com.cm6123.monopoly.app.Application'
+
+}
+
+//tool configuration
+checkstyle {
+    toolVersion = "10.21.2"
+    checkstyleMain.enabled = true
+    checkstyleTest.enabled = false
+}
+
+checkstyleMain {
+    configFile = file("config/checkstyle/checkstyleMain.xml")
+    maxErrors = 10
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+    //reportsDirectory = layout.buildDirectory.dir('jacocoHtml')
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+
+        //html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.5
+            }
+            excludes = [
+                    'com.cm6123.monopoly.app.*'
+            ]
+        }
+    }
+}
+check.dependsOn jacocoTestCoverageVerification
+
+build.dependsOn 'pitest'
+
+// create combined task
+
+task buildAndReport {
+    dependsOn build, jacocoTestReport
+}
+
+rootProject.tasks.named("jar") {
+    duplicatesStrategy = 'include'
+}
+
+pitest {
+    targetClasses = ['com.cm6123.monopoly.*']  //by default "${project.group}.*"
+    pitestVersion = '1.14.4' //not needed when a default PIT version should be used
+    threads = 4
+    outputFormats = ['XML', 'HTML']
+    timestampedReports = false
+    junit5PluginVersion = '1.2.0'
+    verbose = true
+
+    reportAggregator {
+        testStrengthThreshold.set(50)
+        mutationThreshold.set(40)
+        maxSurviving.set(3)
+    }
+    //verbose = true
+
+
+
+}
+
+
+
